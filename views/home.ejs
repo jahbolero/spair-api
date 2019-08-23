@@ -1,0 +1,85 @@
+<html>
+<head>
+
+</head>		
+<body>
+
+	Input flight Code here : <input type = "text" name = "flightCode" id = "flightCode">
+	<br>
+ 	Input flight Number here : <input type = "text" name = "flightID" id = "flightNumber">
+    <br>
+	<button id = "submit">submit</button>
+
+	<div id = "flightDetails">
+	</div>
+	<button id = "update" style = "display:none">update</button>
+</body>
+</html>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+	$("#submit").on("click",function(){
+		$("#flightDetails").empty();
+		var data = {"flightNumber" : $("#flightNumber").val().toString(),
+					"flightCode" : $("#flightCode").val().toString()
+
+
+					};
+		
+		$.ajax({
+  			url: "/flightDetails",
+  			data: data,
+  			cache: false,
+  			type: 'POST',
+  			success: function(dat){
+  				if(dat != "FLIGHT NOT FOUND"){
+	    			$("#flightDetails").append("<span id = 'fCode'>"+dat.flightCode+"</span>");
+	    			$("#flightDetails").append("<br>");
+	    			$("#flightDetails").append("<span id = 'fNumber'>"+dat.flightNumber+"</span>");
+	    			$("#flightDetails").append("<br>");
+	    			$("#flightDetails").append("Input boarding gate here: ");
+	    			$("#flightDetails").append('<input type = "text" name = "boardingGate" value="'+dat.boardingGate+'" id = "boardingGate"><br>');
+	    		    $("#flightDetails").append("choose boarding status here: <br>");
+	    			if(dat.isBoarding != "true"){
+	    				console.log(data.isBoarding);
+	    				console.log("not true");
+	    				$("#flightDetails").append('<input type="radio" name="flight" value="true"> is boarding<br><input type="radio" name="flight" value="false" checked="checked">not boarding<br>');
+	    			}else{
+						$("#flightDetails").append('<input type="radio" name="flight" value="true" checked="checked"> is boarding<br><input type="radio" name="flight" value="false">not boarding<br>');
+					}
+					$("#flightDetails").append("<br>");
+					$("#update").css("display","block");
+
+    			}else{
+    				$("#flightDetails").append("FLIGHT NOT FOUND");
+    			}
+
+  			}
+		});
+	});
+
+	$("#update").on("click",function(){
+		console.log("here");
+	
+		var radioValue = $("input[name='flight']:checked").val();
+
+		var data = {"flightNumber" : $("#fNumber").html().toString(),
+					"flightCode" : $("#fCode").html().toString(),
+					"boardingGate": $("#boardingGate").val().toString(),
+					"isBoarding" : radioValue.toString()
+					};
+
+		console.log(data);
+		$.ajax({
+  			url: "/updateTerminal",
+  			data: data,
+  			cache: false,
+  			type: 'POST',
+  			success: function(dat){
+  				$("#flightDetails").empty();
+  				$("#flightDetails").append(dat);
+  				$("#update").css("display","none");
+  			}
+  		});
+		
+	});
+</script>
